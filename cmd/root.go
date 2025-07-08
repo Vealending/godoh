@@ -1,8 +1,10 @@
 package cmd
 
 import (
+	"crypto/tls"
 	"fmt"
 	"math/rand"
+	"net/http"
 	"os"
 	"time"
 
@@ -38,6 +40,18 @@ var rootCmd = &cobra.Command{
 
 		// configure the TLS validation setup
 		options.SetTLSValidation()
+
+		if options.KeyLogFile != "" {
+			f, err := os.OpenFile(options.KeyLogFile, os.O_CREATE|os.O_WRONLY|os.O_APPEND, 0600)
+			if err != nil {
+				log.Fatal().Err(err).Msg("failed to open key log file")
+			}
+			tr := http.DefaultTransport.(*http.Transport)
+			if tr.TLSClientConfig == nil {
+				tr.TLSClientConfig = &tls.Config{}
+			}
+			tr.TLSClientConfig.KeyLogWriter = f
+		}
 
 		// Setup the logger to use
 		log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr, TimeFormat: "02 Jan 2006 15:04:05"})
@@ -94,4 +108,5 @@ func init() {
 
 	rootCmd.PersistentFlags().StringVarP(&options.ProviderName, "provider", "p", "google", "Preferred DNS provider to use. [possible: googlefront, google, cloudflare, quad9, raw]")
 	rootCmd.PersistentFlags().BoolVarP(&options.ValidateTLS, "validate-certificate", "K", false, "Validate DoH provider SSL certificates")
+	rootCmd.PersistentFlags().StringVarP(&options.KeyLogFile, "keylog", "l", "", "Write TLS keys to file")
 }
