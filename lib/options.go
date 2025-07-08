@@ -24,6 +24,7 @@ type Options struct {
 
 	// TLS config
 	ValidateTLS bool
+	KeyLogFile  string
 }
 
 // NewOptions returns a new options struct
