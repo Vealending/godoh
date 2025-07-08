@@ -54,7 +54,7 @@ Flags:
   -h, --help                   help for godoh
   -p, --provider string        Preferred DNS provider to use. [possible: googlefront, google, cloudflare, quad9, raw] (default "google")
   -K, --validate-certificate   Validate DoH provider SSL certificates
-  -l, --keylog string         Write TLS keys to file
+  -l, --keylog string          Write TLS keys to file
 
 Use "godoh [command] --help" for more information about a command.
 ```
