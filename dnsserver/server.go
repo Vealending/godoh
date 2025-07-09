@@ -335,7 +335,7 @@ func (h *Handler) parseARRLabels(r *dns.Msg) (string, byte, int, int, []byte, er
 	// See protocol.utils.Requestify for details.
 
 	// the first label will have a ;. a dig thing.
-	ident := strings.Split(hsq[0], ";")[1]
+    ident := strings.ToLower(strings.Split(hsq[0], ";")[1])
 
 	streamTypeBytes, err := hex.DecodeString(hsq[1])
 	if err != nil {
@@ -387,9 +387,9 @@ func (h *Handler) parseARRLabels(r *dns.Msg) (string, byte, int, int, []byte, er
 	}
 
 	// crc32 check
-	if hsq[3] != fmt.Sprintf("%02x", crc32.ChecksumIEEE(byteData)) {
-		log.Warn().Str("agent", ident).Str("expected-crc", hsq[3]).
-			Uint32("calculated-crc", crc32.ChecksumIEEE(byteData)).Msg("crc32 check failed")
+        if strings.ToLower(hsq[3]) != fmt.Sprintf("%02x", crc32.ChecksumIEEE(byteData)) {
+                log.Warn().Str("agent", ident).Str("expected-crc", hsq[3]).
+                        Uint32("calculated-crc", crc32.ChecksumIEEE(byteData)).Msg("crc32 check failed")
 	}
 
 	return ident, streamType, seq, transferProtocol, byteData, nil
@@ -410,13 +410,13 @@ func (h *Handler) parseTxtRRLabels(r *dns.Msg) (string, int, error) {
 	}
 
 	// the first label will have a ;. a dig thing.
-	identData := strings.Split(hsq[0], ";")[1]
-	identBytes, err := hex.DecodeString(identData)
-	if err != nil {
-		log.Debug().Err(err).Msg("failed to decode ident bytes")
-		return "", protocol.PollTypeUndefined, errors.New(protocol.FailureDNSResponse)
-	}
-	ident := string(identBytes)
+        identData := strings.Split(hsq[0], ";")[1]
+        identBytes, err := hex.DecodeString(identData)
+        if err != nil {
+                log.Debug().Err(err).Msg("failed to decode ident bytes")
+                return "", protocol.PollTypeUndefined, errors.New(protocol.FailureDNSResponse)
+        }
+        ident := strings.ToLower(hex.EncodeToString(identBytes))
 
 	// what type of checkin do we have
 	pollType, err := strconv.Atoi(hsq[1])
